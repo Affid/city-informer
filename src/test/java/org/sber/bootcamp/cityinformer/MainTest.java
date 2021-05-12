@@ -19,10 +19,9 @@ public class MainTest {
             "Оренбургская область", "Татарстан", "Якутия", "Алтай", "Московская область"};
 
 
-
     @Test
     @Order(1)
-    @DisplayName("Десериализация из файла")
+    @DisplayName("Чтение городов из файла")
     void checkRead() {
         Path correctPath = Paths.get("src/test/resources/config1.txt");
         Path incorrectPath = Paths.get("src/test/resources/conf.txt");
@@ -60,7 +59,7 @@ public class MainTest {
         List<City> cities = getRandomCities(10);
         cities.sort(CityComparatorFactory.byName());
         int[] maxPop = Main.findMaxPopulation(cities.toArray(new City[0]));
-        for(City city: cities){
+        for (City city : cities) {
             assertTrue(city.getPopulation() <= maxPop[1]);
         }
     }
@@ -76,7 +75,7 @@ public class MainTest {
         Map<String, Integer> regionsMap = Main.getCitiesByRegion(cities);
         assertEquals(regionsMap.size(), regions.length);
         for (int val : regionsMap.values()) {
-            assertEquals(val,countPerRegion);
+            assertEquals(val, countPerRegion);
         }
     }
 
@@ -113,11 +112,11 @@ public class MainTest {
         int bigLeftLimit = 'А';
         int bigRightLimit = 'Я';
         StringBuilder generatedString = new StringBuilder();
-        for(int i = 0; i < len; i++) {
-                if(random.nextInt(2) == 1)
-                    generatedString.append((char)(leftLimit + random.nextInt(rightLimit + 1 - leftLimit)));
-                else
-                    generatedString.append((char)(bigLeftLimit + random.nextInt(bigRightLimit + 1 - bigLeftLimit)));
+        for (int i = 0; i < len; i++) {
+            if (random.nextInt(2) == 1)
+                generatedString.append((char) (leftLimit + random.nextInt(rightLimit + 1 - leftLimit)));
+            else
+                generatedString.append((char) (bigLeftLimit + random.nextInt(bigRightLimit + 1 - bigLeftLimit)));
         }
         return generatedString.toString();
     }

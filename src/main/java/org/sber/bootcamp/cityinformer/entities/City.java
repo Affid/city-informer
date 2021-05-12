@@ -1,6 +1,7 @@
 package org.sber.bootcamp.cityinformer.entities;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class City {
     private String name;
@@ -46,5 +47,18 @@ public class City {
                 ", population=" + population +
                 ", date=" + date.getYear() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        City city = (City) o;
+        return population == city.population && name.equals(city.name) && region.equals(city.region) && district.equals(city.district) && date.equals(city.date);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, region, district, population, date);
     }
 }
