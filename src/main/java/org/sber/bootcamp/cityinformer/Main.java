@@ -3,6 +3,7 @@ package org.sber.bootcamp.cityinformer;
 import org.sber.bootcamp.cityinformer.entities.City;
 import org.sber.bootcamp.cityinformer.util.CityComparatorFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,7 +49,7 @@ public class Main {
         System.out.println(getCitiesByRegion(cities));
     }
 
-    private static Map<String, Integer> getCitiesByRegion(List<City> cities){
+    static Map<String, Integer> getCitiesByRegion(List<City> cities){
         HashMap<String, Integer> map = new HashMap<>();
         for(City city: cities){
             map.compute(city.getRegion(), (key,v) -> v==null?1:v+1);
@@ -57,7 +58,7 @@ public class Main {
     }
 
 
-    private static int[] findMaxPopulation(City[] cities){
+    static int[] findMaxPopulation(City[] cities){
         if(cities == null || cities.length == 0)
             throw new IllegalArgumentException("Передан пустой массив");
         int index = 0;
@@ -71,7 +72,7 @@ public class Main {
         return new int[]{index, maxPop};
     }
 
-    private static void read(){
+    static void read(){
         Scanner scanner = new Scanner(System.in);
         List<City> cities = null;
         boolean stop = false;
@@ -131,30 +132,41 @@ public class Main {
         }
     }
 
-    private static List<City> consoleRead(Scanner scanner) {
+    static List<City> consoleRead(Scanner scanner) {
         System.out.print("Число записей: ");
         int count = scanner.nextInt();
         scanner.nextLine();
         ArrayList<City> cities = new ArrayList<>();
         while (count-- > 0) {
-            cities.add(readCity(scanner));
+            try {
+                cities.add(readCity(scanner));
+            }catch (IOException e){
+                System.out.println(e.getMessage());
+                System.out.println("Повторите ввод строки.");
+            }
         }
         return cities;
     }
 
-    private static List<City> fileRead(Path path) throws IOException {
-        List<String> lines = Files.readAllLines(path);
-        ArrayList<City> cities = new ArrayList<>();
-        for(String line: lines){
-            cities.add(readCity(new Scanner(line)));
+    static List<City> fileRead(Path path) throws IOException {
+        if(Files.isReadable(path)) {
+            List<String> lines = Files.readAllLines(path);
+            ArrayList<City> cities = new ArrayList<>();
+            for (String line : lines) {
+                cities.add(readCity(new Scanner(line)));
+            }
+            return cities;
         }
-        return cities;
+        else
+            throw new IllegalArgumentException("Файл недоступен для чтения или не существует");
     }
 
 
-    private static City readCity(Scanner scanner) {
+    static City readCity(Scanner scanner) throws IOException {
         String rawData = scanner.nextLine();
         String[] data = rawData.split(";");
+        if(data.length != 6)
+            throw new IOException("Неформатная строка");
         String name = data[1];
         String region = data[2];
         String district = data[3];
