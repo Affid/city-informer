@@ -1,7 +1,10 @@
 package org.sber.bootcamp.cityinformer;
 
+import org.junit.jupiter.api.*;
 import org.sber.bootcamp.cityinformer.entities.City;
 import org.sber.bootcamp.cityinformer.util.CityComparatorFactory;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -9,139 +12,77 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MainTest {
 
     private static String[] regions = new String[]{"Адыгея", "Хакасия", "Башкортостан",
             "Оренбургская область", "Татарстан", "Якутия", "Алтай", "Московская область"};
 
-    /**
-     * Проводит все тесты.
-     */
-    public static void main(String[] args) {
-        boolean ok = checkRead();
-        System.out.println("Чтение: " + (ok ? "✓" : "x"));
-        if (ok) {
-            ok = checkSort();
-            System.out.println("Сортировка: " + (ok ? "✓" : "x"));
-            if (ok) {
-                ok = checkMaxPopulation();
-                System.out.println("Поиск крупнейшего города: " + (ok ? "✓" : "x"));
-                if (ok) {
-                    ok = checkCitiesInRegion();
-                    System.out.println("Подсчет городов в регионах: " + (ok ? "✓" : "x"));
-                }
-            }
-        }
-    }
 
-    /**
-     * Тест чтения из файла.
-     * @return {@code true}, если тест пройден
-     */
-    public static boolean checkRead() {
+
+    @Test
+    @Order(1)
+    @DisplayName("Десериализация из файла")
+    void checkRead() {
         Path correctPath = Paths.get("src/test/resources/config1.txt");
         Path incorrectPath = Paths.get("src/test/resources/conf.txt");
         Path invalidDataPath = Paths.get("src/test/resources/config2.txt");
         Path invalidDataPath2 = Paths.get("src/test/resources/config3.txt");
-        boolean result;
-        try { //чтение корректного файла
-            Main.fileRead(correctPath);
-            result = true;
-        } catch (IOException e) {
-            result = false;
-        }
-        if (!result)
-            return false;
-        try { //чтение по неправильному пути
-            Main.fileRead(incorrectPath);
-            result = false;
-        } catch (IOException e) {
-            result = false;
-        } catch (IllegalArgumentException e) { //отлавливаем ошибку, сообщающую, что путь некорректен
-            result = true;
-        }
-        if (!result)
-            return false;
-        try {//читаем файл с неформатной строкой
-            Main.fileRead(invalidDataPath);
-            result = false;
-        } catch (IOException e) {
-            result = "Неформатная строка".equals(e.getMessage());
-        }
-        if (!result)
-            return false;
-        try { //читаем файл с некорректными данными - строки вместо чисел
-            Main.fileRead(invalidDataPath2);
-            result = false;
-        } catch (NumberFormatException e) {
-            result = true;
-        } catch (IOException e) {
-            result = false;
-        }
-
-        return result;
+        assertDoesNotThrow(() -> Main.fileRead(correctPath));
+        assertThrows(IllegalArgumentException.class, () -> Main.fileRead(incorrectPath));
+        assertThrows(IOException.class, () -> Main.fileRead(invalidDataPath), "Неформатная строка");
+        assertThrows(NumberFormatException.class, () -> Main.fileRead(invalidDataPath2));
     }
 
-    /**
-     * Тест сортировки.
-     * @return {@code true}, если тест пройден
-     */
-    public static boolean checkSort() {
-        try {
-            List<City> cities = Main.fileRead(Paths.get("src/test/resources/config1.txt"));
-            cities.sort(CityComparatorFactory.byName());
-            for (int i = 1; i < cities.size(); i++) {
-                if (cities.get(i).getName().toLowerCase(Locale.ROOT).compareTo(cities.get(i - 1).getName().toLowerCase(Locale.ROOT)) < 0)
-                    return false;
-            }
-            cities.sort(CityComparatorFactory.byDistrict());
-            for (int i = 1; i < cities.size(); i++) {
-                int res = cities.get(i).getDistrict().compareTo(cities.get(i - 1).getDistrict());
-                if (res < 0)
-                    return false;
-                else if (res == 0 && cities.get(i).getName().compareTo(cities.get(i - 1).getName()) < 0)
-                    return false;
-            }
-            return true;
-        } catch (IOException e) {
-            return false;
+
+    @Test
+    @Order(2)
+    @DisplayName("Сортировки")
+    void checkSort() {
+        List<City> cities = getRandomCities(6);
+        cities.sort(CityComparatorFactory.byName());
+        for (int i = 1; i < cities.size(); i++) {
+            assertFalse(cities.get(i).getName().compareToIgnoreCase(cities.get(i - 1).getName()) < 0);
+        }
+        cities.sort(CityComparatorFactory.byDistrict());
+        for (int i = 1; i < cities.size(); i++) {
+            int res = cities.get(i).getDistrict().compareTo(cities.get(i - 1).getDistrict());
+            assertFalse(res < 0);
+            assertFalse(res == 0 && cities.get(i).getName().compareTo(cities.get(i - 1).getName()) < 0);
         }
     }
 
-    /**
-     * Тест поиска максимального населения.
-     * @return {@code true}, если тест пройден
-     */
-    public static boolean checkMaxPopulation() {
-        try {
-            List<City> cities = Main.fileRead(Paths.get("src/test/resources/config1.txt"));
-            cities.sort(CityComparatorFactory.byName());
-            int[] maxPop = Main.findMaxPopulation(cities.toArray(new City[0]));
-            return (maxPop[0] == 1 && maxPop[1] == 165183);
-        } catch (IOException e) {
-            return false;
+
+    @Test
+    @Order(3)
+    @DisplayName("Поиск максимального населения")
+    void checkMaxPopulation() {
+        List<City> cities = getRandomCities(10);
+        cities.sort(CityComparatorFactory.byName());
+        int[] maxPop = Main.findMaxPopulation(cities.toArray(new City[0]));
+        for(City city: cities){
+            assertTrue(city.getPopulation() <= maxPop[1]);
         }
     }
 
-    /**
-     * Тест разбиения городов по регионам
-     * @return {@code true}, если тест пройден
-     */
-    public static boolean checkCitiesInRegion() {
+
+    @Test
+    @Order(4)
+    @DisplayName("Разбиение городов по регионам")
+    void checkCitiesInRegion() {
         int countPerRegion = 3;
         List<City> cities = getRandomCities(countPerRegion);
+        cities.sort(CityComparatorFactory.byName());
         Map<String, Integer> regionsMap = Main.getCitiesByRegion(cities);
-        if (regionsMap.size() != regions.length)
-            return false;
+        assertEquals(regionsMap.size(), regions.length);
         for (int val : regionsMap.values()) {
-            if (val != countPerRegion)
-                return false;
+            assertEquals(val,countPerRegion);
         }
-        return true;
     }
 
     /**
      * Генерирует список случайных городов в каждом регионе.
+     *
      * @param countPerRegion количество городов в каждом регионе.
      * @return список городов
      */
@@ -162,6 +103,7 @@ public class MainTest {
 
     /**
      * Генерирует случайную буквенную строку заданной длины
+     *
      * @param len длина выходной строки
      * @return случайная срока
      */
