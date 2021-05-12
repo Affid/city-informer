@@ -1,8 +1,11 @@
 package org.sber.bootcamp.cityinformer;
 
+
 import org.junit.jupiter.api.*;
 import org.sber.bootcamp.cityinformer.model.City;
 import org.sber.bootcamp.cityinformer.util.CityComparatorFactory;
+import org.sber.bootcamp.cityinformer.util.CityReader;
+import org.sber.bootcamp.cityinformer.util.Pair;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,11 +16,17 @@ import java.time.LocalDate;
 import java.util.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class MainTest {
+public class CityDictionaryTest {
 
     private static String[] regions = new String[]{"Адыгея", "Хакасия", "Башкортостан",
             "Оренбургская область", "Татарстан", "Якутия", "Алтай", "Московская область"};
 
+    private static CityDictionary dictionary;
+
+    @BeforeAll
+    static void setDictionary(){
+        dictionary = new CityDictionary();
+    }
 
     @Test
     @Order(1)
@@ -58,9 +67,9 @@ public class MainTest {
     void checkMaxPopulation() {
         List<City> cities = getRandomCities(10);
         cities.sort(CityComparatorFactory.byName());
-        int[] maxPop = Main.findMaxPopulation(cities.toArray(new City[0]));
+        Pair<Integer, Integer> maxPop = dictionary.findMaxPopulation();
         for (City city : cities) {
-            assertTrue(city.getPopulation() <= maxPop[1]);
+            assertTrue(city.getPopulation() <= maxPop.getFirst());
         }
     }
 
@@ -72,7 +81,7 @@ public class MainTest {
         int countPerRegion = 3;
         List<City> cities = getRandomCities(countPerRegion);
         cities.sort(CityComparatorFactory.byName());
-        Map<String, Integer> regionsMap = Main.getCitiesByRegion(cities);
+        Map<String, Integer> regionsMap = dictionary.getCitiesByRegion();
         assertEquals(regionsMap.size(), regions.length);
         for (int val : regionsMap.values()) {
             assertEquals(val, countPerRegion);

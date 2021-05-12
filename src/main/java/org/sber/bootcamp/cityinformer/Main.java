@@ -1,89 +1,78 @@
 package org.sber.bootcamp.cityinformer;
 
-import org.sber.bootcamp.cityinformer.model.City;
-import org.sber.bootcamp.cityinformer.util.CityComparatorFactory;
+import org.sber.bootcamp.cityinformer.util.Pair;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 public class Main {
+    private static final String menu = "Меню:\n1 - Считать города из файла\n2 - Отсортировать по названию" +
+            "\n3 - Отсортировать по федеральному округу\n4 - Вывести город с максимальным населением" +
+            "\n5 - Вывести численность городов в регионах\n6 - Вывести города\n7 - Вывести это меню\n8 - Выйти";
 
-    /**
-     * Производит чтение из файла, если путь указан в качестве аргумента при запуске программы.
-     *
-     * @param args путь к файлу
-     */
     public static void main(String[] args) {
-        List<City> cities = null;
-        if (args.length > 0) {
-            if (Files.isReadable(Paths.get(args[0]))) {
-                try {
-                    cities = CityReader.fileRead(Paths.get(args[0]));
-                } catch (IOException e) {
-                    Logger.getLogger("Main").log(Level.WARNING, "ОШИБКА ЧТЕНИЯ ФАЙЛА " + args[0], e);
-                    System.exit(2);
-                }
-            } else {
-                Logger.getLogger("Main").log(Level.WARNING, "Файл недоступен для чтения " + args[0]);
-                System.exit(1);
-            }
-        } else {
-            Scanner scanner = new Scanner(System.in);
-            cities = CityReader.consoleRead(scanner);
-        }
-        System.out.println("Несортированный список городов:\n");
-        cities.forEach(System.out::println);
-        cities.sort(CityComparatorFactory.byName());
-        System.out.println("\nСортировка по названию:");
-        cities.forEach(System.out::println);
-        cities.sort(CityComparatorFactory.byDistrict());
-        System.out.println("\nСортировка по федеральному округу:");
-        cities.forEach(System.out::println);
-
-        int[] maxPopulation = findMaxPopulation(cities.toArray(new City[0]));
-        System.out.printf("\nМаксимальное население:\n\t[%d] = %d\n", maxPopulation[0], maxPopulation[1]);
-        System.out.println("Города в регионах:");
-        System.out.println(getCitiesByRegion(cities));
-    }
-
-    /**
-     * Разбиение количества городов по регионам
-     *
-     * @param cities города
-     * @return словарь, ключ - название региона, значение - количество городов в регионе
-     */
-    static Map<String, Integer> getCitiesByRegion(List<City> cities) {
-        HashMap<String, Integer> map = new HashMap<>();
-        for (City city : cities) {
-            map.compute(city.getRegion(), (key, v) -> v == null ? 1 : v + 1);
-        }
-        return map;
-    }
-
-
-    /**
-     * Ищет город с максимальным населением
-     *
-     * @param cities города
-     * @return массив с двумя элементами. Первый - индекс найденного города в массиве. 2 - население этого города.
-     */
-    static int[] findMaxPopulation(City[] cities) {
-        if (cities == null || cities.length == 0)
-            throw new IllegalArgumentException("Передан пустой массив");
-        int index = 0;
-        int maxPop = cities[0].getPopulation();
-        for (int i = 1; i < cities.length; i++) {
-            if (cities[i].getPopulation() > maxPop) {
-                maxPop = cities[i].getPopulation();
-                index = i;
+        Scanner scanner = new Scanner(System.in);
+        CityDictionary cityDictionary = new CityDictionary();
+        String command;
+        System.out.println(menu);
+        boolean stop = false;
+        while (!stop) {
+            System.out.print("Введите команду: ");
+            while (!scanner.hasNextLine()) ;
+            command = scanner.nextLine();
+            switch (command) {
+                case "1":
+                    System.out.println("Введите путь к файлу:");
+                    command = scanner.nextLine();
+                    try {
+                        cityDictionary.readFile(command);
+                    } catch (IOException e) {
+                        System.out.println("Ошибка чтения файла");
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Некорректный путь. Указанный файл не существует или не доступен для чтения");
+                    }
+                    System.out.println("Данные загружены.");
+                    break;
+                case "2":
+                    cityDictionary.sortByName();
+                    System.out.println("Сортировка завершена");
+                    break;
+                case "3":
+                    cityDictionary.sortByDistrict();
+                    System.out.println("Сортировка завершена");
+                    break;
+                case "4":
+                    try {
+                        Pair<Integer, Integer> pair = cityDictionary.findMaxPopulation();
+                        System.out.printf("[%d] = %d\n", pair.getFirst(), pair.getSecond());
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Сначала загрузите данные о городах.");
+                    }
+                    break;
+                case "5":
+                    Map<String, Integer> regions = cityDictionary.getCitiesByRegion();
+                    if (regions.size() > 0) {
+                        regions.forEach((k, v) -> System.out.println(k + " : " + v));
+                    } else {
+                        System.out.println("Сначала загрузите данные о городах.");
+                    }
+                    break;
+                case "6":
+                    cityDictionary.printCities();
+                    break;
+                case "7":
+                    System.out.println(menu);
+                    break;
+                case "8":
+                    stop = true;
+                    break;
+                default:
+                    System.out.println("Команда отсутствует");
+                    break;
             }
         }
-        return new int[]{index, maxPop};
+        scanner.close();
     }
-
-
 }

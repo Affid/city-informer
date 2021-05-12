@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class City {
-    private String name;
-    private String region;
-    private String district;
-    private int population;
-    private LocalDate date;
+    private final String name;
+    private final String region;
+    private final String district;
+    private final int population;
+    private final LocalDate date;
 
     public City(String name, String region, String district, int population, LocalDate date) {
         this.name = name;
