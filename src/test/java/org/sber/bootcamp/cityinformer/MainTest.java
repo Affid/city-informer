@@ -2,7 +2,6 @@ package org.sber.bootcamp.cityinformer;
 
 import org.sber.bootcamp.cityinformer.entities.City;
 import org.sber.bootcamp.cityinformer.util.CityComparatorFactory;
-import org.w3c.dom.ls.LSOutput;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -15,6 +14,9 @@ public class MainTest {
     private static String[] regions = new String[]{"Адыгея", "Хакасия", "Башкортостан",
             "Оренбургская область", "Татарстан", "Якутия", "Алтай", "Московская область"};
 
+    /**
+     * Проводит все тесты.
+     */
     public static void main(String[] args) {
         boolean ok = checkRead();
         System.out.println("Чтение: " + (ok ? "✓" : "x"));
@@ -32,6 +34,10 @@ public class MainTest {
         }
     }
 
+    /**
+     * Тест чтения из файла.
+     * @return {@code true}, если тест пройден
+     */
     public static boolean checkRead() {
         Path correctPath = Paths.get("src/test/resources/config1.txt");
         Path incorrectPath = Paths.get("src/test/resources/conf.txt");
@@ -76,6 +82,10 @@ public class MainTest {
         return result;
     }
 
+    /**
+     * Тест сортировки.
+     * @return {@code true}, если тест пройден
+     */
     public static boolean checkSort() {
         try {
             List<City> cities = Main.fileRead(Paths.get("src/test/resources/config1.txt"));
@@ -98,6 +108,10 @@ public class MainTest {
         }
     }
 
+    /**
+     * Тест поиска максимального населения.
+     * @return {@code true}, если тест пройден
+     */
     public static boolean checkMaxPopulation() {
         try {
             List<City> cities = Main.fileRead(Paths.get("src/test/resources/config1.txt"));
@@ -109,6 +123,10 @@ public class MainTest {
         }
     }
 
+    /**
+     * Тест разбиения городов по регионам
+     * @return {@code true}, если тест пройден
+     */
     public static boolean checkCitiesInRegion() {
         int countPerRegion = 3;
         List<City> cities = getRandomCities(countPerRegion);
@@ -122,7 +140,11 @@ public class MainTest {
         return true;
     }
 
-
+    /**
+     * Генерирует список случайных городов в каждом регионе.
+     * @param countPerRegion количество городов в каждом регионе.
+     * @return список городов
+     */
     private static List<City> getRandomCities(int countPerRegion) {
         List<City> cities = new ArrayList<>();
         Random random = new Random();
@@ -138,6 +160,11 @@ public class MainTest {
         return cities;
     }
 
+    /**
+     * Генерирует случайную буквенную строку заданной длины
+     * @param len длина выходной строки
+     * @return случайная срока
+     */
     private static String getRandomString(Random random, int len) {
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'

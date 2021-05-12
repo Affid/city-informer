@@ -3,7 +3,6 @@ package org.sber.bootcamp.cityinformer;
 import org.sber.bootcamp.cityinformer.entities.City;
 import org.sber.bootcamp.cityinformer.util.CityComparatorFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +14,10 @@ import java.util.logging.Logger;
 
 public class Main {
 
+    /**
+     * Производит чтение из файла, если путь указан в качестве аргумента при запуске программы.
+     * @param args путь к файлу
+     */
     public static void main(String[] args) {
         List<City> cities = null;
         if(args.length>0) {
@@ -49,6 +52,11 @@ public class Main {
         System.out.println(getCitiesByRegion(cities));
     }
 
+    /**
+     * Разбиение количества городов по регионам
+     * @param cities города
+     * @return словарь, ключ - название региона, значение - количество городов в регионе
+     */
     static Map<String, Integer> getCitiesByRegion(List<City> cities){
         HashMap<String, Integer> map = new HashMap<>();
         for(City city: cities){
@@ -58,6 +66,11 @@ public class Main {
     }
 
 
+    /**
+     * Ищет город с максимальным населением
+     * @param cities города
+     * @return массив с двумя элементами. Первый - индекс найденного города в массиве. 2 - население этого города.
+     */
     static int[] findMaxPopulation(City[] cities){
         if(cities == null || cities.length == 0)
             throw new IllegalArgumentException("Передан пустой массив");
@@ -72,66 +85,11 @@ public class Main {
         return new int[]{index, maxPop};
     }
 
-    static void read(){
-        Scanner scanner = new Scanner(System.in);
-        List<City> cities = null;
-        boolean stop = false;
-        System.out.println("Меню:\n\t1 - ввести данные с консоли\n\t2 - ввести данные из файла\n\t3 - выход");
-        while (!stop) {
-            int option = scanner.nextInt();
-            switch (option) {
-                case 1:
-                    cities = consoleRead(scanner);
-                    break;
-                case 2:
-                    System.out.println("Введите путь к файлу:");
-                    scanner.nextLine();
-                    String path = scanner.nextLine();
-                    Path filePath = Paths.get(path);
-                    boolean inputEnded = filePath.toFile().isFile();
-                    while (!inputEnded) {
-                        System.out.println("Файл не найден. Повторите ввод? (да/нет)");
-                        path = scanner.nextLine();
-                        if ("да".equals(path)) {
-                            path = scanner.nextLine();
-                            filePath = Paths.get(path);
-                            inputEnded = filePath.toFile().isFile();
-                        } else {
-                            stop = true;
-                            inputEnded = true;
-                        }
-                    }
-                    if (!stop) {
-                        try {
-                            cities = fileRead(filePath);
-                        }
-                        catch (IOException e){
-                            Logger.getLogger("Main").log(Level.WARNING, "ОШИБКА ЧТЕНИЯ ФАЙЛА "+ filePath,e);
-                        }
-                    }
-                    break;
-                case 3:
-                    stop = true;
-                    break;
-                default:
-                    System.out.println("Некорректная опция. Повторите ввод.");
-                    break;
-            }
-            if(cities != null){
-                System.out.println(cities);
-            }
-            if (!stop) {
-                System.out.println("Хотите повторить?(да/нет)");
-                String answer = scanner.nextLine();
-                if ("да".equals(answer)) {
-                    System.out.println("Меню:\n\t1 - ввести данные с консоли\n\t2 - ввести данные из файла\n\t3 - выход");
-                }
-                else
-                    stop = true;
-            }
-        }
-    }
-
+    /**
+     * Чтение списка городов из консоли
+     * @param scanner сканнер для чтения из потока ввода
+     * @return список считанных городов
+     */
     static List<City> consoleRead(Scanner scanner) {
         System.out.print("Число записей: ");
         int count = scanner.nextInt();
@@ -139,21 +97,27 @@ public class Main {
         ArrayList<City> cities = new ArrayList<>();
         while (count-- > 0) {
             try {
-                cities.add(readCity(scanner));
+                cities.add(readCity(scanner.nextLine()));
             }catch (IOException e){
                 System.out.println(e.getMessage());
                 System.out.println("Повторите ввод строки.");
+                count++;
             }
         }
         return cities;
     }
 
+    /**
+     * Чтение списка городов из файла
+     * @param path путь к файлу для чтения
+     * @return список городов, считанных из файла
+     */
     static List<City> fileRead(Path path) throws IOException {
         if(Files.isReadable(path)) {
             List<String> lines = Files.readAllLines(path);
             ArrayList<City> cities = new ArrayList<>();
             for (String line : lines) {
-                cities.add(readCity(new Scanner(line)));
+                cities.add(readCity(line));
             }
             return cities;
         }
@@ -162,8 +126,13 @@ public class Main {
     }
 
 
-    static City readCity(Scanner scanner) throws IOException {
-        String rawData = scanner.nextLine();
+    /**
+     * Десериализует объект City из строки
+     * @param rawData строка для обработки
+     * @return считанный объект City
+     * @throws IOException если переданная строка в неправильном формате
+     */
+    static City readCity(String rawData) throws IOException {
         String[] data = rawData.split(";");
         if(data.length != 6)
             throw new IOException("Неформатная строка");
