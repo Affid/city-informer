@@ -1,4 +1,4 @@
-package org.sber.bootcamp.cityinformer;
+package org.sber.bootcamp.cityinformer.util;
 
 import org.sber.bootcamp.cityinformer.model.City;
 
@@ -17,7 +17,7 @@ public class CityReader {
      * @param path путь к файлу для чтения
      * @return список городов, считанных из файла
      */
-    static List<City> fileRead(Path path) throws IOException {
+    public static List<City> fileRead(Path path) throws IOException {
         if (Files.isReadable(path)) {
             List<String> lines = Files.readAllLines(path);
             ArrayList<City> cities = new ArrayList<>();
