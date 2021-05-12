@@ -40,9 +40,9 @@ public class MainTest {
     @DisplayName("Сортировки")
     void checkSort() {
         List<City> cities = getRandomCities(6);
-        cities.sort(CityComparatorFactory.byName());
+        cities.sort(CityComparatorFactory.byName().reversed());
         for (int i = 1; i < cities.size(); i++) {
-            assertFalse(cities.get(i).getName().compareToIgnoreCase(cities.get(i - 1).getName()) < 0);
+            assertTrue(cities.get(i).getName().compareToIgnoreCase(cities.get(i - 1).getName()) < 0);
         }
         cities.sort(CityComparatorFactory.byDistrict());
         for (int i = 1; i < cities.size(); i++) {
@@ -108,14 +108,17 @@ public class MainTest {
      * @return случайная срока
      */
     private static String getRandomString(Random random, int len) {
-        int leftLimit = 97; // letter 'a'
-        int rightLimit = 122; // letter 'z'
-
-        String generatedString = random.ints(leftLimit, rightLimit + 1)
-                .limit(len)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-
-        return generatedString;
+        int leftLimit = 'а';
+        int rightLimit = 'я';
+        int bigLeftLimit = 'А';
+        int bigRightLimit = 'Я';
+        StringBuilder generatedString = new StringBuilder();
+        for(int i = 0; i < len; i++) {
+                if(random.nextInt(2) == 1)
+                    generatedString.append((char)(leftLimit + random.nextInt(rightLimit + 1 - leftLimit)));
+                else
+                    generatedString.append((char)(bigLeftLimit + random.nextInt(bigRightLimit + 1 - bigLeftLimit)));
+        }
+        return generatedString.toString();
     }
 }
