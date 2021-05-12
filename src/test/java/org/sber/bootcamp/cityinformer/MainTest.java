@@ -1,7 +1,7 @@
 package org.sber.bootcamp.cityinformer;
 
 import org.junit.jupiter.api.*;
-import org.sber.bootcamp.cityinformer.entities.City;
+import org.sber.bootcamp.cityinformer.model.City;
 import org.sber.bootcamp.cityinformer.util.CityComparatorFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,10 +27,10 @@ public class MainTest {
         Path incorrectPath = Paths.get("src/test/resources/conf.txt");
         Path invalidDataPath = Paths.get("src/test/resources/config2.txt");
         Path invalidDataPath2 = Paths.get("src/test/resources/config3.txt");
-        assertDoesNotThrow(() -> Main.fileRead(correctPath));
-        assertThrows(IllegalArgumentException.class, () -> Main.fileRead(incorrectPath));
-        assertThrows(IOException.class, () -> Main.fileRead(invalidDataPath), "Неформатная строка");
-        assertThrows(NumberFormatException.class, () -> Main.fileRead(invalidDataPath2));
+        assertDoesNotThrow(() -> CityReader.fileRead(correctPath));
+        assertThrows(IllegalArgumentException.class, () -> CityReader.fileRead(incorrectPath));
+        assertThrows(IOException.class, () -> CityReader.fileRead(invalidDataPath), "Неформатная строка");
+        assertThrows(NumberFormatException.class, () -> CityReader.fileRead(invalidDataPath2));
     }
 
 
@@ -39,7 +39,7 @@ public class MainTest {
     @DisplayName("Сортировки")
     void checkSort() {
         List<City> cities = getRandomCities(6);
-        cities.sort(CityComparatorFactory.byName().reversed());
+        cities.sort(CityComparatorFactory.byName());
         for (int i = 1; i < cities.size(); i++) {
             assertTrue(cities.get(i).getName().compareToIgnoreCase(cities.get(i - 1).getName()) < 0);
         }

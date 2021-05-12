@@ -1,14 +1,13 @@
 package org.sber.bootcamp.cityinformer.util;
 
-import org.sber.bootcamp.cityinformer.entities.City;
+import org.sber.bootcamp.cityinformer.model.City;
 
 import java.util.Comparator;
-import java.util.Locale;
 
 public class CityComparatorFactory {
 
     public static Comparator<City> byName(){
-        return Comparator.comparing(o -> o.getName().toLowerCase(Locale.ROOT));
+        return (o1, o2) -> o2.getName().compareToIgnoreCase(o1.getName());
     }
 
     public static Comparator<City> byDistrict(){

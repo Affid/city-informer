@@ -1,4 +1,4 @@
-package org.sber.bootcamp.cityinformer.entities;
+package org.sber.bootcamp.cityinformer.model;
 
 import java.time.LocalDate;
 import java.util.Objects;
