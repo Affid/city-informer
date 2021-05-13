@@ -41,12 +41,13 @@ public class CityReader {
         if (data.length != 6) {
             throw new IOException("Неформатная строка");
         }
+        int id = Integer.parseInt(data[0]);
         String name = data[1];
         String region = data[2];
         String district = data[3];
         int population = Integer.parseInt(data[4]);
         LocalDate date = LocalDate.of(Integer.parseInt(data[5]), 1, 1);
-        return new City(name, region, district, population, date);
+        return new City(id, name, region, district, population, date);
     }
 
     /**

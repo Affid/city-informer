@@ -4,47 +4,67 @@ package org.sber.bootcamp.cityinformer;
 import org.junit.jupiter.api.*;
 import org.sber.bootcamp.cityinformer.model.City;
 import org.sber.bootcamp.cityinformer.util.CityComparatorFactory;
-import org.sber.bootcamp.cityinformer.util.CityReader;
 import org.sber.bootcamp.cityinformer.util.Pair;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CityDictionaryTest {
+public class FileCityDictionaryTest {
 
     private static String[] regions = new String[]{"Адыгея", "Хакасия", "Башкортостан",
             "Оренбургская область", "Татарстан", "Якутия", "Алтай", "Московская область"};
 
-    private static CityDictionary dictionary;
+    private static FileCityDictionary dictionary;
 
-    @BeforeAll
-    static void setDictionary(){
-        dictionary = new CityDictionary();
+    @BeforeEach
+    void setDictionary(){
+        dictionary = new FileCityDictionary("src/test/resources/config1.txt");
+        try {
+            dictionary.readFile();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     @Test
     @Order(1)
-    @DisplayName("Чтение городов из файла")
-    void checkRead() {
-        Path correctPath = Paths.get("src/test/resources/config1.txt");
-        Path incorrectPath = Paths.get("src/test/resources/conf.txt");
-        Path invalidDataPath = Paths.get("src/test/resources/config2.txt");
-        Path invalidDataPath2 = Paths.get("src/test/resources/config3.txt");
-        assertDoesNotThrow(() -> CityReader.fileRead(correctPath));
-        assertThrows(IllegalArgumentException.class, () -> CityReader.fileRead(incorrectPath));
-        assertThrows(IOException.class, () -> CityReader.fileRead(invalidDataPath), "Неформатная строка");
-        assertThrows(NumberFormatException.class, () -> CityReader.fileRead(invalidDataPath2));
+    @DisplayName("Чтение корректного файла")
+    void checkCorrectRead() {
+        FileCityDictionary dictionary = new FileCityDictionary("src/test/resources/config1.txt");
+        assertDoesNotThrow(dictionary::readFile);
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("Чтение несуществующего файла")
+    void checkIncorrectPath(){
+        FileCityDictionary dictionary = new FileCityDictionary("src/test/resources/conf.txt");
+        assertThrows(IllegalArgumentException.class, dictionary::readFile);
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("Чтение файла с неформатной строкой")
+    void checkInvalidDataFormat(){
+        FileCityDictionary dictionary = new FileCityDictionary("src/test/resources/config2.txt");
+        assertThrows(IOException.class, dictionary::readFile, "Неформатная строка");
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Чтение файла со строкой вместо числа населения")
+    void checkInvalidPopulation(){
+        FileCityDictionary dictionary = new FileCityDictionary("src/test/resources/config3.txt");
+        assertThrows(NumberFormatException.class, dictionary::readFile);
     }
 
 
     @Test
-    @Order(2)
+    @Order(5)
     @DisplayName("Сортировки")
     void checkSort() {
         List<City> cities = getRandomCities(6);
@@ -62,25 +82,23 @@ public class CityDictionaryTest {
 
 
     @Test
-    @Order(3)
+    @Order(6)
     @DisplayName("Поиск максимального населения")
     void checkMaxPopulation() {
-        List<City> cities = getRandomCities(10);
-        cities.sort(CityComparatorFactory.byName());
         Pair<Integer, Integer> maxPop = dictionary.findMaxPopulation();
-        for (City city : cities) {
-            assertTrue(city.getPopulation() <= maxPop.getFirst());
+        for (City city : dictionary.getCities()) {
+            assertTrue(city.getPopulation() <= maxPop.getSecond());
         }
     }
 
 
     @Test
-    @Order(4)
+    @Order(7)
     @DisplayName("Разбиение городов по регионам")
     void checkCitiesInRegion() {
         int countPerRegion = 3;
-        List<City> cities = getRandomCities(countPerRegion);
-        cities.sort(CityComparatorFactory.byName());
+        dictionary.setCities(getRandomCities(countPerRegion));
+        dictionary.sortByName();
         Map<String, Integer> regionsMap = dictionary.getCitiesByRegion();
         assertEquals(regionsMap.size(), regions.length);
         for (int val : regionsMap.values()) {
@@ -97,13 +115,14 @@ public class CityDictionaryTest {
     private static List<City> getRandomCities(int countPerRegion) {
         List<City> cities = new ArrayList<>();
         Random random = new Random();
+        int i = 1;
         for (String region : regions) {
             for (int j = 0; j < countPerRegion; j++) {
                 String name = getRandomString(random, 10);
                 String district = getRandomString(random, 5);
                 int population = 500 + random.nextInt(10_000_000);
                 int year = 1830 + random.nextInt(190);
-                cities.add(new City(name, region, district, population, LocalDate.of(year, 1, 1)));
+                cities.add(new City(i++,name, region, district, population, LocalDate.of(year, 1, 1)));
             }
         }
         return cities;
