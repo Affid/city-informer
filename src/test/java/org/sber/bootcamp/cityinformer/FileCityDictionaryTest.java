@@ -3,6 +3,7 @@ package org.sber.bootcamp.cityinformer;
 
 import org.junit.jupiter.api.*;
 import org.sber.bootcamp.cityinformer.model.City;
+import org.sber.bootcamp.cityinformer.service.FileCityDictionary;
 import org.sber.bootcamp.cityinformer.util.CityComparatorFactory;
 import org.sber.bootcamp.cityinformer.util.Pair;
 
@@ -24,7 +25,7 @@ public class FileCityDictionaryTest {
     void setDictionary(){
         dictionary = new FileCityDictionary("src/test/resources/config1.txt");
         try {
-            dictionary.readFile();
+            dictionary.update();
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -35,7 +36,7 @@ public class FileCityDictionaryTest {
     @DisplayName("Чтение корректного файла")
     void checkCorrectRead() {
         FileCityDictionary dictionary = new FileCityDictionary("src/test/resources/config1.txt");
-        assertDoesNotThrow(dictionary::readFile);
+        assertDoesNotThrow(dictionary::update);
     }
 
     @Test
@@ -43,7 +44,7 @@ public class FileCityDictionaryTest {
     @DisplayName("Чтение несуществующего файла")
     void checkIncorrectPath(){
         FileCityDictionary dictionary = new FileCityDictionary("src/test/resources/conf.txt");
-        assertThrows(IllegalArgumentException.class, dictionary::readFile);
+        assertThrows(IllegalArgumentException.class, dictionary::update);
     }
 
     @Test
@@ -51,7 +52,7 @@ public class FileCityDictionaryTest {
     @DisplayName("Чтение файла с неформатной строкой")
     void checkInvalidDataFormat(){
         FileCityDictionary dictionary = new FileCityDictionary("src/test/resources/config2.txt");
-        assertThrows(IOException.class, dictionary::readFile, "Неформатная строка");
+        assertThrows(IOException.class, dictionary::update, "Неформатная строка");
     }
 
     @Test
@@ -59,7 +60,7 @@ public class FileCityDictionaryTest {
     @DisplayName("Чтение файла со строкой вместо числа населения")
     void checkInvalidPopulation(){
         FileCityDictionary dictionary = new FileCityDictionary("src/test/resources/config3.txt");
-        assertThrows(NumberFormatException.class, dictionary::readFile);
+        assertThrows(NumberFormatException.class, dictionary::update);
     }
 
 

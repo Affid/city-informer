@@ -1,4 +1,4 @@
-package org.sber.bootcamp.cityinformer;
+package org.sber.bootcamp.cityinformer.service;
 
 import org.sber.bootcamp.cityinformer.model.City;
 import org.sber.bootcamp.cityinformer.util.Pair;
@@ -9,9 +9,7 @@ import java.util.Map;
 
 public interface CityDictionary {
 
-    void printCities();
-
-    void readFile() throws IOException;
+    void update() throws IOException;
 
     void sortByName();
 
@@ -30,7 +28,20 @@ public interface CityDictionary {
      *
      * @return массив с двумя элементами. Первый - индекс найденного города в массиве. 2 - население этого города.
      */
-    Pair<Integer, Integer> findMaxPopulation();
+    default Pair<Integer, Integer> findMaxPopulation(){
+        City[] cities = getCities().toArray(new City[0]);
+        if (cities.length == 0)
+            throw new IllegalArgumentException("Передан пустой массив");
+        int index = 0;
+        int maxPop = cities[0].getPopulation();
+        for (int i = 1; i < cities.length; i++) {
+            if (cities[i].getPopulation() > maxPop) {
+                maxPop = cities[i].getPopulation();
+                index = i;
+            }
+        }
+        return new Pair<>(index, maxPop);
+    }
 
     List<City> getCities();
 
