@@ -6,29 +6,42 @@ import org.sber.bootcamp.cityinformer.service.FileCityDictionary;
 import org.sber.bootcamp.cityinformer.util.Pair;
 import org.sber.bootcamp.cityinformer.util.State;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-    private static final String basicMenu = String.join("", Collections.nCopies(50,"\n\r")) +
-            "Меню:\n1 - База данных\n2 - Загрузить свой файл" +
-            "\n3 - Вывести это меню\n4 - Выйти";
+    private static final String basicMenu = String.join("\n", Collections.nCopies(50, "\n\r")) +
+            String.join("\n", "Меню:",
+                    "1 - База данных",
+                    "2 - Загрузить свой файл",
+                    "3 - Вывести это меню",
+                    "4 - Выйти");
 
-    private static final String fileMenu = String.join("", Collections.nCopies(50,"\n\r")) +
-            "Меню:\n1 - Отсортировать по названию" +
-            "\n2 - Отсортировать по федеральному округу\n3 - Вывести город с максимальным населением" +
-            "\n4 - Вывести численность городов в регионах\n5 - Вывести города" +
-            "\n6 - Вывести это меню\n7 - Загрузить другой файл\n8 - Назад\n9 - Выйти";
+    private static final String fileMenu = String.join("", Collections.nCopies(50, "\n\r")) +
+            String.join("\n", "Меню:",
+                    "1 - Отсортировать по названию",
+                    "2 - Отсортировать по федеральному округу",
+                    "3 - Вывести город с максимальным населением",
+                    "4 - Вывести численность городов в регионах",
+                    "5 - Вывести города" +
+                            "6 - Вывести это меню",
+                    "7 - Загрузить другой файл",
+                    "8 - Назад",
+                    "9 - Выйти");
 
-    private static final String dbMenu = String.join("", Collections.nCopies(50,"\n\r")) +
-            "Меню:\n1 - Отсортировать по названию" +
-            "\n2 - Отсортировать по федеральному округу\n3 - Вывести город с максимальным населением" +
-            "\n4 - Вывести численность городов в регионах\n5 - Вывести города" +
-            "\n6 - Вывести это меню\n7 - Обновить данные\n8 - Назад\n9- Выйти";
+    private static final String dbMenu = String.join("", Collections.nCopies(50, "\n\r")) +
+            String.join("\n", "Меню:",
+                    "1 - Отсортировать по названию",
+                    "2 - Отсортировать по федеральному округу",
+                    "3 - Вывести город с максимальным населением",
+                    "4 - Вывести численность городов в регионах",
+                    "5 - Вывести города",
+                    "6 - Вывести это меню",
+                    "7 - Обновить данные",
+                    "8 - Назад",
+                    "9- Выйти");
 
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
@@ -40,7 +53,7 @@ public class Main {
             command = scanner.nextLine();
             boolean readyToRead = false;
             while (true) {
-                if(readyToRead) {
+                if (readyToRead) {
                     System.out.print("#");
                     command = scanner.nextLine();
                 }
@@ -153,11 +166,11 @@ public class Main {
                         break;
                     case 5:
                         Pair<Integer, Integer> pair = cityDictionary.findMaxPopulation();
-                        System.out.printf("[%d] = %d\n",pair.getFirst(), pair.getSecond());
+                        System.out.printf("[%d] = %d\n", pair.getFirst(), pair.getSecond());
                         state = state.getPrevious();
                         break;
                     case 6:
-                        cityDictionary.getCitiesByRegion().forEach((k,v) -> System.out.println(k + " : " + v));
+                        cityDictionary.getCitiesByRegion().forEach((k, v) -> System.out.println(k + " : " + v));
                         state = state.getPrevious();
                         break;
                     case 7:
@@ -165,7 +178,7 @@ public class Main {
                         state = state.getPrevious();
                         break;
                     case 8:
-                        switch (state.getPrevious().getValue()){
+                        switch (state.getPrevious().getValue()) {
                             case 1:
                                 System.out.println(fileMenu);
                                 break;
@@ -204,12 +217,12 @@ public class Main {
                 t.printStackTrace();
             }
             System.err.println("Произошла ошибка при чтении базы данных");
-        }catch (IOException e){
+        } catch (IOException e) {
             System.err.println("Произошла ошибка при чтении пользовательского файла");
         }
     }
 
-    private static FileCityDictionary readNewFile(Scanner scanner){
+    private static FileCityDictionary readNewFile(Scanner scanner) {
         FileCityDictionary cityDictionary = null;
         String command;
         while (cityDictionary == null) {
